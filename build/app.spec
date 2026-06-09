@@ -64,6 +64,7 @@ APP_MODULES = [
     "version", "paths", "events", "logging_setup", "cli", "reports",
     "consolidate_xlsx_base", "consolidate_ramp_summary", "consolidate_ramp_detail",
     "consolidate_highway_sequence", "consolidate_highway_log",
+    "consolidate_tsn_highway_log",
     "gui_main", "gui_app", "gui_worker", "gui_theme",
 ]
 
