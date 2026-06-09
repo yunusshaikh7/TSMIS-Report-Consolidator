@@ -1,0 +1,38 @@
+# Local Claude Code permission state (not app code).
+.claude/
+
+# output/ holds the user's exported files and generated workbooks (potentially
+# gigabytes). Keep the folder structure committed via .gitkeep stubs, but ignore
+# everything else so inputs and consolidated workbooks don't get checked in.
+output/*
+!output/ramp_summary/
+!output/ramp_detail/
+!output/highway_sequence/
+!output/highway_log/
+!output/consolidated/
+output/ramp_summary/*
+output/ramp_detail/*
+output/highway_sequence/*
+output/highway_log/*
+output/consolidated/*
+!output/ramp_summary/.gitkeep
+!output/ramp_detail/.gitkeep
+!output/highway_sequence/.gitkeep
+!output/highway_log/.gitkeep
+!output/consolidated/.gitkeep
+
+__pycache__/
+*.pyc
+.venv/
+
+# Build artifacts (portable onefolder packaging). Keep build\app.spec, build.ps1,
+# build\prune_bundle.ps1 and build\full_smoke.py tracked; ignore the heavy
+# generated pieces.
+/dist/
+build/.venv/
+build/pyi-work/
+/TSMIS-Consolidator-*.zip      # the distributable zip (uploaded to GitHub Releases)
+
+# Runtime diagnostics written next to the app (dev: repo root). The rotating
+# log is a local artifact, never committed.
+/logs/
