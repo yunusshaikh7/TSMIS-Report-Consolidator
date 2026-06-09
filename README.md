@@ -26,6 +26,14 @@ machine. Distributed as a single zip: unzip, double-click, done.
 | TSAR: Ramp Detail | XLSX | `input/ramp_detail/` | `tsar_ramp_detail_consolidated.xlsx` (rows stacked, leading `Route` column) |
 | Highway Sequence Listing | XLSX | `input/highway_sequence/` | `highway_sequence_consolidated.xlsx` (rows stacked, leading `Route` column) |
 | Highway Log | XLSX | `input/highway_log/` | `highway_log_consolidated.xlsx` (rows stacked, leading `Route` column) |
+| TSN Highway Log | district PDFs | `input/tsn_highway_log/` | `tsn_highway_log_consolidated.xlsx` (PDFs converted to the TSMIS Highway Log format, then combined) |
+
+**TSN Highway Log:** the TSN "California State Highway Log" district PDFs
+(report OTM52010, e.g. `D01_Highway_Log_TSN.pdf`) are first converted to
+per-route workbooks in `output/tsn_highway_log/` using the **exact** sheet name
+and 31-column layout of the TSMIS Highway Log export, then combined. The result
+is column-for-column compatible with `highway_log_consolidated.xlsx`, so the
+TSN and TSMIS data can be compared directly.
 
 ## Getting started (end users)
 

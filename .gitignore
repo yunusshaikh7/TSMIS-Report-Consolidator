@@ -10,14 +10,17 @@ input/*
 !input/ramp_detail/
 !input/highway_sequence/
 !input/highway_log/
+!input/tsn_highway_log/
 input/ramp_summary/*
 input/ramp_detail/*
 input/highway_sequence/*
 input/highway_log/*
+input/tsn_highway_log/*
 !input/ramp_summary/.gitkeep
 !input/ramp_detail/.gitkeep
 !input/highway_sequence/.gitkeep
 !input/highway_log/.gitkeep
+!input/tsn_highway_log/.gitkeep
 output/*
 !output/.gitkeep
 

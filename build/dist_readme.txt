@@ -8,6 +8,8 @@ WHAT IT DOES
     - TSAR: Ramp Detail         (reads Excel)
     - Highway Sequence Listing  (reads Excel)
     - Highway Log               (reads Excel)
+    - TSN Highway Log           (reads the TSN district PDFs and converts
+                                 them to the TSMIS Excel layout first)
   No login, no browser, no internet -- it only reads files already on this PC.
 
 HOW TO RUN

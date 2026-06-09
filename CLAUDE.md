@@ -19,6 +19,7 @@ be considered for porting back, and vice versa.
 | 2 | TSAR: Ramp Detail | XLSX | `input/ramp_detail/` | `tsar_ramp_detail_consolidated.xlsx` |
 | 3 | Highway Sequence Listing | XLSX | `input/highway_sequence/` | `highway_sequence_consolidated.xlsx` |
 | 4 | Highway Log | XLSX | `input/highway_log/` | `highway_log_consolidated.xlsx` |
+| 5 | TSN Highway Log | PDF (per district) | `input/tsn_highway_log/` | `tsn_highway_log_consolidated.xlsx` (+ per-route conversions in `output/tsn_highway_log/`) |
 
 ## Two Run Modes, One Core
 
@@ -74,6 +75,7 @@ scripts/
   consolidate_xlsx_base.py    # shared XLSX consolidator core
   consolidate_ramp_summary.py # standalone (parses PDFs; audited workbook + Combined sheet)
   consolidate_{ramp_detail,highway_sequence,highway_log}.py  # thin wrappers over the base
+  consolidate_tsn_highway_log.py  # standalone: TSN district PDFs -> TSMIS-format per-route XLSX -> combined
   gui_main.py / gui_app.py / gui_worker.py / gui_theme.py    # GUI entry / window / workers / styles
 build/
   build.ps1           # one-command onefolder build (-SelfTest = headless verify gate)
@@ -82,7 +84,7 @@ build/
   app.ico / app.manifest / full_smoke.py / dist_readme.txt / .venv/ (git-ignored)
 dist/                 # build output: dist/TSMIS Consolidator/ (git-ignored)
 input/                # the user's exported files go here (.gitkeep stubs; contents git-ignored)
-  ramp_summary/ ramp_detail/ highway_sequence/ highway_log/
+  ramp_summary/ ramp_detail/ highway_sequence/ highway_log/ tsn_highway_log/
 output/               # everything the app writes (consolidated workbooks); contents git-ignored
 ```
 
@@ -105,6 +107,16 @@ artifacts (`build/.venv`, `dist/`), or `.claude/` permission state.
   merged, so misaligned columns can't silently corrupt the combined workbook.
 - **Route extraction** comes from the filename (`…_route_<ROUTE>.xlsx`), falling
   back to the file stem; Ramp Summary reads the route from the PDF title.
+- **TSN Highway Log is a converter + consolidator.** The TSN district log
+  (OTM52010) is a fixed-layout PDF in proportional Helvetica, parsed by
+  x-position windows (`COLUMN_WINDOWS`): lines are clustered with a 3pt y
+  tolerance (data rows wrap 1pt), `* *` totals and the per-page header band are
+  skipped, the centered `<district> <county> <route>` header switches context,
+  and description lines attach to the data row above them. Output uses the
+  **exact** TSMIS Highway Log sheet name + 31-column header (`TSMIS_HEADER`),
+  TSN-only ADT columns dropped, so the combined workbook is column-compatible
+  with the TSMIS `highway_log_consolidated.xlsx` for comparison. Previously
+  converted files are cleared each run so the result mirrors the input PDFs.
 - **write_only streaming** in the XLSX core keeps memory flat for
   hundreds-of-thousands-row outputs; openpyxl style objects are built inside
   functions (never at module scope) so importing a core never touches openpyxl —
@@ -162,7 +174,9 @@ extracted release: `prune_bundle.ps1 -Target "…\TSMIS Consolidator"`
    inside functions).
 2. Add the `__main__` → `run_consolidate_cli` block.
 3. Add one `(label, module)` entry to `CONSOLIDATE_REPORTS` in `reports.py`
-   (feeds the GUI) and a branch to `2. consolidate…bat`.
+   (feeds the GUI) and a branch to `2. consolidate…bat`. (A converter that
+   produces TSMIS-format files and then consolidates them fits the same
+   contract — see `consolidate_tsn_highway_log.py`.)
 4. List the module in `APP_MODULES` in `build/app.spec`.
 5. Add `input/<name>/.gitkeep`, whitelist it in `.gitignore`.
 6. Document in the table at the top.
