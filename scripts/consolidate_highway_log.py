@@ -1,7 +1,7 @@
 """Consolidate Highway Log XLSX files into a single workbook.
 
-Reads every XLSX in   output/highway_log/   (or a caller-chosen folder)
-Writes one workbook in output/consolidated/highway_log_consolidated.xlsx
+Reads every XLSX in   input/highway_log/   (or a caller-chosen folder)
+Writes one workbook in output/highway_log_consolidated.xlsx
 with a leading "Route" column added so rows from different routes are
 distinguishable in the combined file.
 
@@ -16,11 +16,10 @@ cli.run_consolidate_cli, used by the __main__ entry (and therefore by
 "2. consolidate (combine reports).bat").
 """
 from consolidate_xlsx_base import consolidate_xlsx
-from paths import OUTPUT_ROOT
+from paths import INPUT_ROOT, OUTPUT_ROOT
 
-INPUT_DIR = OUTPUT_ROOT / "highway_log"
-OUT_DIR = OUTPUT_ROOT / "consolidated"
-OUT_PATH = OUT_DIR / "highway_log_consolidated.xlsx"
+INPUT_DIR = INPUT_ROOT / "highway_log"
+OUT_PATH = OUTPUT_ROOT / "highway_log_consolidated.xlsx"
 
 # Sheet name produced by the TSMIS export — must match exactly.
 SHEET_NAME = "Highway Log"

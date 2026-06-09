@@ -13,12 +13,12 @@ be considered for porting back, and vice versa.
 
 ## Supported Reports
 
-| # | Report | Input | Default input folder | Combined output (`output/consolidated/`) |
+| # | Report | Input | Default input folder | Combined output (`output/`) |
 |---|---|---|---|---|
-| 1 | TSAR: Ramp Summary | PDF | `output/ramp_summary/` | `tsar_ramp_summary_consolidated.xlsx` |
-| 2 | TSAR: Ramp Detail | XLSX | `output/ramp_detail/` | `tsar_ramp_detail_consolidated.xlsx` |
-| 3 | Highway Sequence Listing | XLSX | `output/highway_sequence/` | `highway_sequence_consolidated.xlsx` |
-| 4 | Highway Log | XLSX | `output/highway_log/` | `highway_log_consolidated.xlsx` |
+| 1 | TSAR: Ramp Summary | PDF | `input/ramp_summary/` | `tsar_ramp_summary_consolidated.xlsx` |
+| 2 | TSAR: Ramp Detail | XLSX | `input/ramp_detail/` | `tsar_ramp_detail_consolidated.xlsx` |
+| 3 | Highway Sequence Listing | XLSX | `input/highway_sequence/` | `highway_sequence_consolidated.xlsx` |
+| 4 | Highway Log | XLSX | `input/highway_log/` | `highway_log_consolidated.xlsx` |
 
 ## Two Run Modes, One Core
 
@@ -47,7 +47,7 @@ and double-click the `.exe`.
 - **Packaging:** PyInstaller **onefolder**, shipped as a portable zip.
 - **No browser / Playwright** — that's the whole point of this split. If a task
   seems to need one, it belongs in the Exporter repo.
-- **Data location:** the packaged app writes `output/` and logs **next to the
+- **Data location:** the packaged app reads `input/`, writes `output/` and logs **next to the
   `.exe`**, falling back to `%LOCALAPPDATA%\TSMIS Consolidator` if read-only.
   See `scripts/paths.py`.
 - **Input folder is per-run plumbing:** every `consolidate()` accepts
@@ -66,7 +66,7 @@ run app (GUI preview).bat         # dev launcher for the GUI
 requirements.txt / -build.txt     # pinned runtime / build deps
 version.py                        # app name/version (single source of truth)
 scripts/
-  paths.py            # frozen-aware paths: DATA_ROOT, OUTPUT_ROOT, LOG_DIR
+  paths.py            # frozen-aware paths: DATA_ROOT, INPUT_ROOT, OUTPUT_ROOT, LOG_DIR
   logging_setup.py    # rotating file log under LOG_DIR (every entry point calls it)
   events.py           # Events sink + ConsolidateResult
   cli.py              # console adapter: run_consolidate_cli (overwrite prompt, exit codes)
@@ -81,11 +81,12 @@ build/
   app.spec            # PyInstaller spec (pdf/excel only; excludes image libs; version-info + icon + manifest)
   app.ico / app.manifest / full_smoke.py / dist_readme.txt / .venv/ (git-ignored)
 dist/                 # build output: dist/TSMIS Consolidator/ (git-ignored)
-output/               # folder structure tracked (.gitkeep); contents git-ignored
-  ramp_summary/ ramp_detail/ highway_sequence/ highway_log/ consolidated/
+input/                # the user's exported files go here (.gitkeep stubs; contents git-ignored)
+  ramp_summary/ ramp_detail/ highway_sequence/ highway_log/
+output/               # everything the app writes (consolidated workbooks); contents git-ignored
 ```
 
-Don't commit generated `output/` files (only the `.gitkeep` stubs), build
+Don't commit `input/`/`output/` contents (only the `.gitkeep` stubs), build
 artifacts (`build/.venv`, `dist/`), or `.claude/` permission state.
 
 ## Architecture Notes
@@ -163,7 +164,7 @@ extracted release: `prune_bundle.ps1 -Target "…\TSMIS Consolidator"`
 3. Add one `(label, module)` entry to `CONSOLIDATE_REPORTS` in `reports.py`
    (feeds the GUI) and a branch to `2. consolidate…bat`.
 4. List the module in `APP_MODULES` in `build/app.spec`.
-5. Add `output/<name>/.gitkeep`, whitelist it in `.gitignore`.
+5. Add `input/<name>/.gitkeep`, whitelist it in `.gitignore`.
 6. Document in the table at the top.
 
 ## Conventions

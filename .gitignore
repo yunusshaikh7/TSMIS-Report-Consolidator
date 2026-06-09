@@ -1,25 +1,25 @@
 # Local Claude Code permission state (not app code).
 .claude/
 
-# output/ holds the user's exported files and generated workbooks (potentially
-# gigabytes). Keep the folder structure committed via .gitkeep stubs, but ignore
-# everything else so inputs and consolidated workbooks don't get checked in.
+# input/ holds the user's exported files; output/ holds generated workbooks
+# (potentially gigabytes). Keep the folder structure committed via .gitkeep
+# stubs, but ignore the contents so source files and consolidated workbooks
+# don't get checked in.
+input/*
+!input/ramp_summary/
+!input/ramp_detail/
+!input/highway_sequence/
+!input/highway_log/
+input/ramp_summary/*
+input/ramp_detail/*
+input/highway_sequence/*
+input/highway_log/*
+!input/ramp_summary/.gitkeep
+!input/ramp_detail/.gitkeep
+!input/highway_sequence/.gitkeep
+!input/highway_log/.gitkeep
 output/*
-!output/ramp_summary/
-!output/ramp_detail/
-!output/highway_sequence/
-!output/highway_log/
-!output/consolidated/
-output/ramp_summary/*
-output/ramp_detail/*
-output/highway_sequence/*
-output/highway_log/*
-output/consolidated/*
-!output/ramp_summary/.gitkeep
-!output/ramp_detail/.gitkeep
-!output/highway_sequence/.gitkeep
-!output/highway_log/.gitkeep
-!output/consolidated/.gitkeep
+!output/.gitkeep
 
 __pycache__/
 *.pyc

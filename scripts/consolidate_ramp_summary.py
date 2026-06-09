@@ -1,7 +1,7 @@
 """Consolidate TSAR: Ramp Summary PDFs into a single Excel workbook.
 
-Reads every PDF in   output/ramp_summary/
-Writes one workbook in output/consolidated/tsar_ramp_summary_consolidated.xlsx
+Reads every PDF in   input/ramp_summary/
+Writes one workbook in output/tsar_ramp_summary_consolidated.xlsx
 with one row per route plus audit columns that verify the parsed numbers
 sum to the reported total.
 
@@ -30,12 +30,11 @@ try:
 except ImportError:
     _DEPS_OK = False
 
-from paths import OUTPUT_ROOT
+from paths import INPUT_ROOT, OUTPUT_ROOT
 from events import Events, ConsolidateResult
 
-INPUT_DIR = OUTPUT_ROOT / "ramp_summary"
-OUT_DIR = OUTPUT_ROOT / "consolidated"
-OUT_PATH = OUT_DIR / "tsar_ramp_summary_consolidated.xlsx"
+INPUT_DIR = INPUT_ROOT / "ramp_summary"
+OUT_PATH = OUTPUT_ROOT / "tsar_ramp_summary_consolidated.xlsx"
 
 # Friendly report name for user-facing messages (shown in both the GUI and
 # the console, so keep these UI-neutral -- no ".bat" / "menu option" wording).

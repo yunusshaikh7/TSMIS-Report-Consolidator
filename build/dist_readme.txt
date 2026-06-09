@@ -19,9 +19,9 @@ COMBINE FILES
   1. Pick the report type.
   2. Point "Folder with the exported files" at wherever the per-route files
      are -- e.g. the Exporter's  output\ramp_summary  folder -- or copy them
-     into this app's matching  output\<report>  folder and leave the default.
+     into this app's matching  input\<report>  folder and leave the default.
   3. Click  "Start consolidation".
-  The combined workbook is saved in  output\consolidated  next to this app
+  The combined workbook is saved in  output  next to this app
   ("Open folder" takes you there). If one already exists you'll be asked
   before it is overwritten.
 

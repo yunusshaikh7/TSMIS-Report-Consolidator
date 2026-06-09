@@ -1,7 +1,7 @@
 """Consolidate TSAR: Ramp Detail XLSX files into a single workbook.
 
-Reads every XLSX in   output/ramp_detail/   (or a caller-chosen folder)
-Writes one workbook in output/consolidated/tsar_ramp_detail_consolidated.xlsx
+Reads every XLSX in   input/ramp_detail/   (or a caller-chosen folder)
+Writes one workbook in output/tsar_ramp_detail_consolidated.xlsx
 with a leading "Route" column added so rows from different routes are
 distinguishable in the combined file.
 
@@ -16,11 +16,10 @@ cli.run_consolidate_cli, used by the __main__ entry (and therefore by
 "2. consolidate (combine reports).bat").
 """
 from consolidate_xlsx_base import consolidate_xlsx
-from paths import OUTPUT_ROOT
+from paths import INPUT_ROOT, OUTPUT_ROOT
 
-INPUT_DIR = OUTPUT_ROOT / "ramp_detail"
-OUT_DIR = OUTPUT_ROOT / "consolidated"
-OUT_PATH = OUT_DIR / "tsar_ramp_detail_consolidated.xlsx"
+INPUT_DIR = INPUT_ROOT / "ramp_detail"
+OUT_PATH = OUTPUT_ROOT / "tsar_ramp_detail_consolidated.xlsx"
 
 # Sheet name produced by the TSMIS export — must match exactly.
 SHEET_NAME = "TSAR - Ramp Detail"

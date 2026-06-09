@@ -15,7 +15,7 @@ Message protocol (all are (kind, payload) tuples):
 import threading
 
 from events import Events
-from paths import OUTPUT_ROOT
+from paths import INPUT_ROOT, OUTPUT_ROOT
 
 
 class ConsolidateWorker(threading.Thread):
@@ -47,11 +47,17 @@ class ConsolidateWorker(threading.Thread):
 
 def _check_output():
     try:
+        # Create the default input subfolders too, so users can see where to
+        # drop their exported files (best-effort; the picker works regardless).
+        from reports import CONSOLIDATE_REPORTS
+        INPUT_ROOT.mkdir(parents=True, exist_ok=True)
+        for _label, mod in CONSOLIDATE_REPORTS:
+            mod.INPUT_DIR.mkdir(parents=True, exist_ok=True)
         OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
         probe = OUTPUT_ROOT / ".write_test"
         probe.write_text("ok", encoding="utf-8")
         probe.unlink()
-        return ("ok", "Output folder: writable")
+        return ("ok", "Input & output folders: ready")
     except Exception:
         return ("bad", "Output folder: NOT writable")
 

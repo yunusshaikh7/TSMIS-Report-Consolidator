@@ -20,15 +20,13 @@ import gui_theme as theme
 from gui_theme import DOT, PALETTE
 from gui_worker import CheckWorker, ConsolidateWorker
 
-from paths import DATA_ROOT, LOG_DIR, OUTPUT_ROOT
+from paths import DATA_ROOT, INPUT_ROOT, LOG_DIR, OUTPUT_ROOT
 from version import APP_NAME, __version__
 
 # The report list lives in one place (reports.py). Each entry is
 # (label, module) where the module provides consolidate(), INPUT_DIR,
 # OUT_PATH, INPUT_GLOB, and REPORT_NAME.
 from reports import CONSOLIDATE_REPORTS
-
-CONSOLIDATED_DIR = OUTPUT_ROOT / "consolidated"
 
 PAD = 14
 
@@ -182,7 +180,7 @@ class App(tk.Tk):
             row += 1
 
         # Input folder: where the per-route exports live. Defaults to this
-        # app's output/<report>/ but can point anywhere (e.g. the TSMIS Reports
+        # app's input/<report>/ but can point anywhere (e.g. the TSMIS Reports
         # Exporter's output folder on the same PC).
         ttk.Label(f, text="FOLDER WITH THE EXPORTED FILES", style="Section.TLabel").grid(
             row=row, column=0, sticky="w", pady=(10, 2))
@@ -204,7 +202,7 @@ class App(tk.Tk):
         dest = ttk.Frame(f)
         dest.grid(row=row, column=0, sticky="ew", pady=(10, 0))
         dest.columnconfigure(0, weight=1)
-        ttk.Label(dest, text=f"Saved to:  {CONSOLIDATED_DIR}", style="Muted.TLabel",
+        ttk.Label(dest, text=f"Saved to:  {OUTPUT_ROOT}", style="Muted.TLabel",
                   wraplength=460, justify="left").grid(row=0, column=0, sticky="w")
         ttk.Button(dest, text="Open folder",
                    command=self._open_consolidated_folder).grid(row=0, column=1, sticky="e", padx=(8, 0))
@@ -247,13 +245,15 @@ class App(tk.Tk):
         f = ttk.Frame(self, padding=(PAD, 0, PAD, PAD))
         f.grid(row=4, column=0, sticky="ew")
         f.columnconfigure(0, weight=1)
-        ttk.Label(f, text=f"All files are saved under:  {OUTPUT_ROOT}",
+        ttk.Label(f, text=f"Reads input\\…, writes output\\… under:  {DATA_ROOT}",
                   style="Muted.TLabel").grid(row=0, column=0, sticky="w")
         btns = ttk.Frame(f)
         btns.grid(row=0, column=1, sticky="e")
+        ttk.Button(btns, text="Open input folder",
+                   command=self._open_input_folder).grid(row=0, column=0)
         ttk.Button(btns, text="Open output folder",
-                   command=self._open_output_folder).grid(row=0, column=0)
-        ttk.Button(btns, text="Logs", command=self._open_logs_folder).grid(row=0, column=1, padx=(8, 0))
+                   command=self._open_output_folder).grid(row=0, column=1, padx=(8, 0))
+        ttk.Button(btns, text="Logs", command=self._open_logs_folder).grid(row=0, column=2, padx=(8, 0))
 
     # ---- small helpers ------------------------------------------------------
 
@@ -300,7 +300,7 @@ class App(tk.Tk):
         raw = self.input_entry.get().strip()
         if not raw:
             self.input_feedback.config(
-                text="Leave as-is to use this app's output folder, or browse to "
+                text="Leave as-is to use this app's input folder, or browse to "
                      "wherever the exported files are.")
             return
         folder = Path(raw)
@@ -419,11 +419,14 @@ class App(tk.Tk):
             self.cancel_event.set()
             self.log("Cancel requested…")
 
+    def _open_input_folder(self):
+        self._open_folder(INPUT_ROOT)
+
     def _open_output_folder(self):
         self._open_folder(OUTPUT_ROOT)
 
     def _open_consolidated_folder(self):
-        self._open_folder(CONSOLIDATED_DIR)
+        self._open_folder(OUTPUT_ROOT)
 
     def _open_logs_folder(self):
         self._open_folder(LOG_DIR)

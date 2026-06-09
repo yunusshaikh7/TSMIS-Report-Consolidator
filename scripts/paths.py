@@ -11,9 +11,9 @@ Policy ("portable by default, never break"):
     fall back automatically to %LOCALAPPDATA%\\TSMIS Consolidator so the app
     still runs. Callers should surface DATA_ROOT in the UI so the rare
     fallback is never a mystery.
-  * Dev / .bat workflow (not frozen): the repo root (./output), matching the
-    layout the TSMIS Reports Exporter uses, so dropping exported files into
-    output/<report>/ works identically in both apps.
+  * Dev / .bat workflow (not frozen): the repo root (./input, ./output). Drop
+    files exported by the TSMIS Reports Exporter into input/<report>/ (or use
+    the GUI's folder picker to read them from anywhere).
 """
 import os
 import sys
@@ -59,10 +59,15 @@ def _resolve_data_root() -> Path:
 # Resolved once at import time.
 DATA_ROOT = _resolve_data_root()
 
-# Default location of the per-route exports to combine: each report type reads
-# its own subfolder under here, and the combined workbooks land in
-# OUTPUT_ROOT / "consolidated". The GUI lets the user point a run at any other
-# input folder (e.g. the TSMIS Reports Exporter's output) without changing this.
+# Where the per-route exports to combine are read from: each report type reads
+# its own subfolder under here (e.g. input/ramp_summary/). The GUI lets the
+# user point a run at any other folder (e.g. the TSMIS Reports Exporter's
+# output) without changing this.
+INPUT_ROOT = DATA_ROOT / "input"
+
+# Where everything this app produces is written: the consolidated workbooks
+# (and any intermediate converted files, in their own subfolder). Kept separate
+# from INPUT_ROOT so the user's source files and our generated files never mix.
 OUTPUT_ROOT = DATA_ROOT / "output"
 
 # App-private data (logs).

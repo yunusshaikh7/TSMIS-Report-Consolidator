@@ -20,12 +20,12 @@ machine. Distributed as a single zip: unzip, double-click, done.
 
 ## Supported reports
 
-| Report | Input | Combined output (`output/consolidated/`) |
-|---|---|---|
-| TSAR: Ramp Summary | PDFs | `tsar_ramp_summary_consolidated.xlsx` (one audited row per route + a live "Combined" summary sheet) |
-| TSAR: Ramp Detail | XLSX | `tsar_ramp_detail_consolidated.xlsx` (rows stacked, leading `Route` column) |
-| Highway Sequence Listing | XLSX | `highway_sequence_consolidated.xlsx` (rows stacked, leading `Route` column) |
-| Highway Log | XLSX | `highway_log_consolidated.xlsx` (rows stacked, leading `Route` column) |
+| Report | Input | Default input folder | Combined output (`output/`) |
+|---|---|---|---|
+| TSAR: Ramp Summary | PDFs | `input/ramp_summary/` | `tsar_ramp_summary_consolidated.xlsx` (one audited row per route + a live "Combined" summary sheet) |
+| TSAR: Ramp Detail | XLSX | `input/ramp_detail/` | `tsar_ramp_detail_consolidated.xlsx` (rows stacked, leading `Route` column) |
+| Highway Sequence Listing | XLSX | `input/highway_sequence/` | `highway_sequence_consolidated.xlsx` (rows stacked, leading `Route` column) |
+| Highway Log | XLSX | `input/highway_log/` | `highway_log_consolidated.xlsx` (rows stacked, leading `Route` column) |
 
 ## Getting started (end users)
 
@@ -36,7 +36,7 @@ machine. Distributed as a single zip: unzip, double-click, done.
    folder holding the per-route files (e.g. the Exporter's
    `output\ramp_summary`), and click **Start consolidation**.
 
-The combined workbook lands in `output\consolidated` next to the app. Files
+The combined workbook lands in `output\` next to the app. Files
 whose layout doesn't match the report are skipped (and listed in the log) so a
 stray file can't corrupt the combined workbook.
 
@@ -44,7 +44,7 @@ stray file can't corrupt the combined workbook.
 
 ```bat
 1. setup (one time).bat              :: pip install -r requirements.txt
-2. consolidate (combine reports).bat :: console menu (reads output\<report>\)
+2. consolidate (combine reports).bat :: console menu (reads input\<report>\)
 run app (GUI preview).bat            :: the Tkinter GUI from source
 ```
 

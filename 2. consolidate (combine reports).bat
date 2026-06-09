@@ -7,9 +7,9 @@ echo ================================================================
 echo            TSMIS Reports - Bulk Consolidator
 echo ================================================================
 echo.
-echo  Combine per-route exports into one Excel file in
-echo  output\consolidated\.  Put the exported files in the matching
-echo  output\^<report^>\ folder first (or run the GUI to pick any folder).
+echo  Combine per-route exports into one Excel file in output\.
+echo  Put the exported files in the matching input\^<report^>\ folder
+echo  first (or run the GUI to pick any folder).
 echo.
 echo  Which report do you want to consolidate?
 echo.
