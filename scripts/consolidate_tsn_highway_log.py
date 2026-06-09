@@ -21,9 +21,12 @@ TSN-only data that has no TSMIS column (the ADT traffic figures) is dropped;
 TSN description lines are joined into the TSMIS "Description" column.
 
 Parsing is x-position based (the PDF is proportional Helvetica, not
-monospaced): every data value is assigned to a column by the horizontal window
-its center falls in. The windows are calibrated to the OTM52010 layout and
-verified stable across every data row of the sample districts.
+monospaced): every data CHARACTER is assigned to a column by the horizontal
+window its center falls in -- word-level parsing is not safe here, because
+adjacent columns can print closer together than word-segmentation tolerances
+(a filled City code starts ~2pt after the county odometer, fusing into one
+token like '042.010LKPT'). The windows are calibrated to the OTM52010 layout
+and verified stable across every data row of the sample districts.
 
 Console-free like the other consolidators: progress via events.on_log,
 overwrite confirmed through the callback, cancel honored between pages, and a
@@ -77,8 +80,9 @@ INPUT_GLOB = "*.pdf"
 # PDF layout -- calibrated to the OTM52010 "California State Highway Log"
 # =============================================================================
 
-Y_TOLERANCE = 3      # words within this y-distance form one logical line
+Y_TOLERANCE = 3      # chars within this y-distance form one logical line
 HEADER_BAND = 56     # everything above this y on a page is page furniture
+WORD_GAP = 1.5       # x-gap that starts a new token; intra-value gaps are ~0pt
 
 # (column_key, x_min, x_max): a data word belongs to the column whose window
 # contains the word's horizontal CENTER. Order = TSMIS column order; the three
@@ -140,29 +144,68 @@ DISTRICT_FROM_NAME = re.compile(r"D(\d{1,2})", re.IGNORECASE)
 
 
 def _lines(page):
-    """Group the page's words into logical lines (left-to-right), tolerating
-    the 1pt baseline jitter the report's wrapped data rows have."""
-    grouped = []                      # [(top, [word, ...]), ...]
-    for w in sorted(page.extract_words(), key=lambda w: (w["top"], w["x0"])):
-        if grouped and abs(w["top"] - grouped[-1][0]) <= Y_TOLERANCE:
-            grouped[-1][1].append(w)
+    """Cluster the page's characters into logical lines (tolerating the 1pt
+    baseline jitter of wrapped data rows). Each line yields word tokens (for
+    classifying the line) AND the raw characters (for column parsing).
+
+    Data values are assigned to columns CHARACTER by character, never word by
+    word: adjacent columns can sit closer than any word-segmentation tolerance
+    (the county odometer ends ~2pt before the city code begins, so pdfplumber's
+    word extraction fuses them into one token like '042.010LKPT')."""
+    clusters = []                     # [(anchor_top, [char, ...]), ...]
+    for c in sorted(page.chars, key=lambda c: (c["top"], c["x0"])):
+        if not c["text"].strip():
+            continue                  # literal space characters carry no data
+        if clusters and abs(c["top"] - clusters[-1][0]) <= Y_TOLERANCE:
+            clusters[-1][1].append(c)
         else:
-            grouped.append((w["top"], [w]))
-    return [(top, sorted(ws, key=lambda w: w["x0"])) for top, ws in grouped]
+            clusters.append((c["top"], [c]))
+    lines = []
+    for top, chars in clusters:
+        chars.sort(key=lambda c: c["x0"])
+        words = []
+        for c in chars:
+            if words and c["x0"] - words[-1]["x1"] < WORD_GAP:
+                words[-1]["text"] += c["text"]
+                words[-1]["x1"] = c["x1"]
+            else:
+                words.append({"text": c["text"], "x0": c["x0"], "x1": c["x1"]})
+        lines.append((top, words, chars))
+    return lines
 
 
-def _parse_data_line(words):
-    """Map each word of a data line to its column by horizontal center."""
+def _parse_data_line(chars):
+    """Map each character of a data line to its column by horizontal center.
+    Characters of one column abut (~0pt apart); a gap >= WORD_GAP inside the
+    same column means two separate tokens, kept apart with a space."""
     row = {}
-    for w in words:
-        center = (w["x0"] + w["x1"]) / 2
+    last_x1 = {}
+    for c in chars:                   # x-sorted by _lines
+        center = (c["x0"] + c["x1"]) / 2
         for key, lo, hi in COLUMN_WINDOWS:
             if lo <= center < hi:
-                # Two words in one window means the layout shifted -- join them
-                # so nothing is silently lost (shows up visibly in the output).
-                row[key] = (row[key] + " " + w["text"]) if key in row else w["text"]
+                if key in row and c["x0"] - last_x1[key] >= WORD_GAP:
+                    row[key] += " "
+                row[key] = row.get(key, "") + c["text"]
+                last_x1[key] = c["x1"]
                 break
     return row
+
+
+def _normalize_row(row):
+    """Match the TSMIS number formats where TSN prints the same value
+    differently (verified against the consolidated TSMIS Highway Log):
+    MI is zero-padded to 3 integer digits (TSMIS '000.075', TSN '0.075');
+    traveled-way widths carry no leading zeros (TSMIS '36', TSN '036')."""
+    mi = row.get("mi")
+    if mi:
+        m = re.fullmatch(r"(\d+)\.(\d+)", mi)
+        if m:
+            row["mi"] = f"{int(m.group(1)):03d}.{m.group(2)}"
+    for key in ("lb_tw", "rb_tw"):
+        v = row.get(key)
+        if v and re.fullmatch(r"\d{3,}", v):
+            row[key] = v.lstrip("0").rjust(2, "0")
 
 
 def _norm_route(token):
@@ -188,7 +231,7 @@ def parse_pdf(path, events, pdf_name=""):
                 return district, None
             if page_no % 25 == 0:
                 events.on_log(f"    …page {page_no}/{n_pages}")
-            for top, words in _lines(page):
+            for top, words, line_chars in _lines(page):
                 if top < HEADER_BAND:
                     continue                          # per-page header band
                 texts = [w["text"] for w in words]
@@ -221,7 +264,8 @@ def parse_pdf(path, events, pdf_name=""):
                         events.on_log(f"    {pdf_name} p{page_no}: data before "
                                       "any route header; line skipped")
                         continue
-                    row = _parse_data_line(words)
+                    row = _parse_data_line(line_chars)
+                    _normalize_row(row)
                     row["description"] = None
                     routes[route].append(row)
                     last_row = row

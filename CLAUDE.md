@@ -109,10 +109,14 @@ artifacts (`build/.venv`, `dist/`), or `.claude/` permission state.
   back to the file stem; Ramp Summary reads the route from the PDF title.
 - **TSN Highway Log is a converter + consolidator.** The TSN district log
   (OTM52010) is a fixed-layout PDF in proportional Helvetica, parsed by
-  x-position windows (`COLUMN_WINDOWS`): lines are clustered with a 3pt y
-  tolerance (data rows wrap 1pt), `* *` totals and the per-page header band are
-  skipped, the centered `<district> <county> <route>` header switches context,
-  and description lines attach to the data row above them. Output uses the
+  x-position windows (`COLUMN_WINDOWS`) **character by character** — never by
+  words, because adjacent columns print closer than word-segmentation
+  tolerances (a City code starts ~2pt after the county odometer, fusing into
+  `042.010LKPT`). Lines are clustered with a 3pt y tolerance (data rows wrap
+  1pt), `* *` totals and the per-page header band are skipped, the centered
+  `<district> <county> <route>` header switches context, and description lines
+  attach to the data row above them. `_normalize_row` matches TSMIS number
+  formats (MI `000.075`; T-W unpadded `36`). Output uses the
   **exact** TSMIS Highway Log sheet name + 31-column header (`TSMIS_HEADER`),
   TSN-only ADT columns dropped, so the combined workbook is column-compatible
   with the TSMIS `highway_log_consolidated.xlsx` for comparison. Previously
