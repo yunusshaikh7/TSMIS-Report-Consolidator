@@ -1,0 +1,44 @@
+name: release
+
+# Builds the portable Windows onefolder app and publishes it as a GitHub
+# release whenever a version tag (v*) is pushed. The -SelfTest build runs
+# first as the release gate: it builds AND runs the frozen smoke test
+# (pdfplumber over a hand-written PDF, openpyxl round-trip, a real
+# consolidator run, GUI construction) over the pruned bundle, so a broken
+# bundle can never ship.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build + run frozen self-test (release gate)
+        run: powershell -ExecutionPolicy Bypass -File build\build.ps1 -SelfTest
+
+      - name: Build the windowed app
+        run: powershell -ExecutionPolicy Bypass -File build\build.ps1
+
+      - name: Zip the portable folder
+        run: Compress-Archive -Path "dist\TSMIS Consolidator" -DestinationPath "TSMIS-Consolidator-${{ github.ref_name }}-win64.zip"
+
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >
+          gh release create "${{ github.ref_name }}"
+          "TSMIS-Consolidator-${{ github.ref_name }}-win64.zip"
+          --title "TSMIS Consolidator ${{ github.ref_name }}"
+          --notes-file build/release_notes.md
