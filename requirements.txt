@@ -1,0 +1,6 @@
+# Runtime dependencies for TSMIS Report Consolidator (pinned for reproducible
+# builds). No browser automation: the consolidator only reads the per-route
+# files already exported by TSMIS Reports Exporter (PDF + XLSX) and writes one
+# combined workbook.
+pdfplumber==0.11.9
+openpyxl==3.1.5
