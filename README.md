@@ -27,6 +27,7 @@ machine. Distributed as a single zip: unzip, double-click, done.
 | Highway Sequence Listing | XLSX | `input/highway_sequence/` | `highway_sequence_consolidated.xlsx` (rows stacked, leading `Route` column) |
 | Highway Log | XLSX | `input/highway_log/` | `highway_log_consolidated.xlsx` (rows stacked, leading `Route` column) |
 | TSN Highway Log | district PDFs | `input/tsn_highway_log/` | `tsn_highway_log_consolidated.xlsx` (PDFs converted to the TSMIS Highway Log format, then combined) |
+| Compare: TSN vs TSMIS Highway Log | the two consolidated workbooks above | `output/` | `highway_log_comparison.xlsx` (where the vendor data does not represent TSMIS) |
 
 **TSN Highway Log:** the TSN "California State Highway Log" district PDFs
 (report OTM52010, e.g. `D01_Highway_Log_TSN.pdf`) are first converted to
@@ -34,6 +35,13 @@ per-route workbooks in `output/tsn_highway_log/` using the **exact** sheet name
 and 31-column layout of the TSMIS Highway Log export, then combined. The result
 is column-for-column compatible with `highway_log_consolidated.xlsx`, so the
 TSN and TSMIS data can be compared directly.
+
+**The comparison** judges the vendor at TSMIS breakpoints (so TSN's finer
+segmentation never produces false differences), matches county sections by
+postmile overlap, pairs rows exactly on Location + odometer, and suppresses
+every representational convention verified against the data (blank TSMIS cells,
+TSN placeholder codes, sig-date printing rules, epoch dates, description
+encodings). TSMIS rows dated after the TSN snapshot are reported separately.
 
 ## Getting started (end users)
 

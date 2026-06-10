@@ -20,6 +20,7 @@ be considered for porting back, and vice versa.
 | 3 | Highway Sequence Listing | XLSX | `input/highway_sequence/` | `highway_sequence_consolidated.xlsx` |
 | 4 | Highway Log | XLSX | `input/highway_log/` | `highway_log_consolidated.xlsx` |
 | 5 | TSN Highway Log | PDF (per district) | `input/tsn_highway_log/` | `tsn_highway_log_consolidated.xlsx` (+ per-route conversions in `output/tsn_highway_log/`) |
+| 6 | Compare: TSN vs TSMIS Highway Log | the consolidated workbooks of 4 + 5 | `output/` (override via picker) | `highway_log_comparison.xlsx` |
 
 ## Two Run Modes, One Core
 
@@ -76,6 +77,7 @@ scripts/
   consolidate_ramp_summary.py # standalone (parses PDFs; audited workbook + Combined sheet)
   consolidate_{ramp_detail,highway_sequence,highway_log}.py  # thin wrappers over the base
   consolidate_tsn_highway_log.py  # standalone: TSN district PDFs -> TSMIS-format per-route XLSX -> combined
+  compare_highway_log.py          # TSN-vs-TSMIS comparison report (vendor fidelity; see its docstring)
   gui_main.py / gui_app.py / gui_worker.py / gui_theme.py    # GUI entry / window / workers / styles
 build/
   build.ps1           # one-command onefolder build (-SelfTest = headless verify gate)
@@ -121,6 +123,20 @@ artifacts (`build/.venv`, `dist/`), or `.claude/` permission state.
   TSN-only ADT columns dropped, so the combined workbook is column-compatible
   with the TSMIS `highway_log_consolidated.xlsx` for comparison. Previously
   converted files are cleared each run so the result mirrors the input PDFs.
+- **The Highway Log comparison** (`compare_highway_log.py`) answers "did the
+  vendor (TSN) correctly represent TSMIS" without false positives. Core ideas:
+  county sections are detected by odometer resets and matched by postmile
+  overlap (the files order counties differently); rows are paired exactly on
+  (Location, Cnty Odom), then unique Location (absorbs odometer drift), then
+  per-section for duplicates; the vendor is judged AT TSMIS BREAKPOINTS so
+  TSN's finer segmentation (bridges, DVMS stations) can't create findings; a
+  blank TSMIS cell makes no claim (TSN values there are informational);
+  verified conventions are suppressed (TSN omits Sig Chg == Date of Rec, '+'
+  placeholders, Med Wid zero padding, '(DVMS)' description notes); TSMIS L/R-
+  suffix rows are separate alignment series TSN folds into LB/RB columns (not
+  row-comparable); TSMIS rows dated after the newest date in the TSN file are
+  classed "post-snapshot", not vendor errors. Every rule is listed on the
+  report's Summary sheet.
 - **write_only streaming** in the XLSX core keeps memory flat for
   hundreds-of-thousands-row outputs; openpyxl style objects are built inside
   functions (never at module scope) so importing a core never touches openpyxl —

@@ -4,5 +4,5 @@ Imported by the build tooling and the GUI header. Keep this file
 dependency-free so it can be imported from anywhere, including the .spec.
 """
 
-__version__ = "0.2.1"             # semantic version MAJOR.MINOR.PATCH
+__version__ = "0.3.0"             # semantic version MAJOR.MINOR.PATCH
 APP_NAME = "TSMIS Consolidator"   # onefolder / executable name

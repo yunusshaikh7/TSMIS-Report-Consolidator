@@ -14,6 +14,7 @@ import consolidate_ramp_detail as _c_ramp_detail
 import consolidate_highway_sequence as _c_highway_seq
 import consolidate_highway_log as _c_highway_log
 import consolidate_tsn_highway_log as _c_tsn_highway_log
+import compare_highway_log as _c_compare_hl
 
 # (menu label, module). Each module provides consolidate(), INPUT_DIR, OUT_PATH,
 # INPUT_GLOB, and REPORT_NAME. Order here is the display order in the GUI and
@@ -24,4 +25,5 @@ CONSOLIDATE_REPORTS = [
     ("Highway Sequence Listing", _c_highway_seq),
     ("Highway Log", _c_highway_log),
     ("TSN Highway Log (district PDFs)", _c_tsn_highway_log),
+    ("Compare: TSN vs TSMIS Highway Log", _c_compare_hl),
 ]
